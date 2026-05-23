@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.viakid.driver.BuildConfig
 import com.viakid.driver.data.local.TokenManager
 import com.viakid.driver.data.remote.ApiClient
 import com.viakid.driver.data.remote.UserNotFoundException
@@ -463,19 +464,18 @@ class AuthViewModel @Inject constructor(
     }
 
     /**
-     * 开发者快捷登录 - 直接跳过验证码进入主页
-     * 始终可用（开发者后门）
+     * 开发者快捷登录 - 仅 Debug 构建可用
      */
     fun loginAsDeveloper() {
+        if (!BuildConfig.DEBUG) return
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-            // 保存模拟 Token 到 ApiClient（使 API 请求带上认证头）
             val mockAccessToken = "dev_access_token_${System.currentTimeMillis()}"
             val mockRefreshToken = "dev_refresh_token_${System.currentTimeMillis()}"
             apiClient.setTokens(mockAccessToken, mockRefreshToken)
 
-            // 保存 Token 到本地（即使应用重启也能保持登录状态）
             tokenManager.saveTokens(
                 accessToken = mockAccessToken,
                 refreshToken = mockRefreshToken,

@@ -10,11 +10,11 @@ database:
   driver: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
   url: "jdbc:sqlserver://localhost:1433;databaseName=ViaKidDB;encrypt=true;trustServerCertificate=true"
   user: "sa"
-  password: ""
+  password: "YOUR_DB_PASSWORD_HERE"
   poolSize: 10
 
 jwt:
-  secret: "viakid-server-secret-key-change-in-production"
+  secret: "CHANGE_THIS_TO_A_RANDOM_32_CHAR_STRING"
   issuer: "viakid-server"
   audience: "viakid-app"
   realm: "viakid-server"
@@ -23,3 +23,6 @@ jwt:
 
 file:
   uploadDir: "uploads"
+
+cors:
+  allowedHosts: ""

@@ -1,10 +1,10 @@
 package com.viakid.server.service
 
 import com.viakid.server.database.table.*
+import com.viakid.server.exception.BusinessException
 import com.viakid.server.model.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -64,11 +64,13 @@ class OrderService {
 
         val totalCount = query.count().toInt()
 
-        val items = query
+        val orderRows = query
             .orderBy(Orders.pickupDate, SortOrder.DESC)
             .orderBy(Orders.pickupTime, SortOrder.ASC)
             .limit(size).offset(((page - 1) * size).toLong())
-            .map { rowToOrderDto(it) }
+            .toList()
+
+        val items = batchBuildOrderDtos(orderRows)
 
         OrderListData(
             items = items,
@@ -78,9 +80,11 @@ class OrderService {
         )
     }
 
-    fun getOrderDetail(orderId: UUID): OrderDetail = transaction {
-        val row = Orders.selectAll().where { Orders.id eq orderId }.firstOrNull()
-            ?: throw IllegalArgumentException("订单不存在")
+    fun getOrderDetail(orderId: UUID, driverId: UUID): OrderDetail = transaction {
+        val row = Orders.selectAll().where {
+            (Orders.id eq orderId) and (Orders.driverId eq driverId)
+        }.firstOrNull()
+            ?: throw BusinessException(4003, "订单不存在或无权查看")
 
         val children = OrderChildren.selectAll().where { OrderChildren.orderId eq orderId }
             .map { childRow ->
@@ -130,12 +134,14 @@ class OrderService {
     }
 
     fun acceptOrder(orderId: UUID, driverId: UUID) = transaction {
+        checkDriverEligibility(driverId)
+
         val currentStatus = Orders.selectAll().where { Orders.id eq orderId }
             .firstOrNull()?.get(Orders.status)
-            ?: throw IllegalArgumentException("订单不存在")
+            ?: throw BusinessException(4004, "订单不存在")
 
         if (currentStatus != "pending") {
-            throw IllegalArgumentException("订单状态不允许接单，当前状态：$currentStatus")
+            throw BusinessException(4005, "订单状态不允许接单，当前状态：$currentStatus")
         }
 
         Orders.update({ Orders.id eq orderId }) {
@@ -148,10 +154,10 @@ class OrderService {
     fun rejectOrder(orderId: UUID, driverId: UUID, req: RejectRequest) = transaction {
         val currentStatus = Orders.selectAll().where { Orders.id eq orderId }
             .firstOrNull()?.get(Orders.status)
-            ?: throw IllegalArgumentException("订单不存在")
+            ?: throw BusinessException(4004, "订单不存在")
 
         if (currentStatus != "pending") {
-            throw IllegalArgumentException("订单状态不允许拒单，当前状态：$currentStatus")
+            throw BusinessException(4005, "订单状态不允许拒单，当前状态：$currentStatus")
         }
 
         Orders.update({ Orders.id eq orderId }) {
@@ -162,11 +168,11 @@ class OrderService {
 
     fun updateOrderStatus(orderId: UUID, driverId: UUID, newStatus: String) = transaction {
         val row = Orders.selectAll().where { Orders.id eq orderId }.firstOrNull()
-            ?: throw IllegalArgumentException("订单不存在")
+            ?: throw BusinessException(4004, "订单不存在")
 
         val currentDriverId = row[Orders.driverId]
         if (currentDriverId != driverId) {
-            throw IllegalArgumentException("无权操作此订单")
+            throw BusinessException(4003, "无权操作此订单")
         }
 
         val currentStatus = row[Orders.status]
@@ -180,7 +186,7 @@ class OrderService {
 
         val allowed = validTransitions[currentStatus]
         if (allowed == null || newStatus !in allowed) {
-            throw IllegalArgumentException("不允许的状态流转：$currentStatus -> $newStatus")
+            throw BusinessException(4005, "不允许的状态流转：$currentStatus -> $newStatus")
         }
 
         Orders.update({ Orders.id eq orderId }) {
@@ -200,8 +206,8 @@ class OrderService {
             else -> grabableOrders.orderBy(Orders.distance, SortOrder.ASC)
         }
 
-        val items = sorted.limit(size).offset(((page - 1) * size).toLong())
-            .map { rowToOrderDto(it) }
+        val orderRows = sorted.limit(size).offset(((page - 1) * size).toLong()).toList()
+        val items = batchBuildOrderDtos(orderRows)
 
         val mainOrder = items.firstOrNull()
 
@@ -213,14 +219,15 @@ class OrderService {
     }
 
     fun grabOrder(orderId: UUID, driverId: UUID): GrabResult = transaction {
+        checkDriverEligibility(driverId)
+
         val row = Orders.selectAll().where { Orders.id eq orderId }.firstOrNull()
-            ?: throw IllegalArgumentException("订单不存在")
+            ?: throw BusinessException(4004, "订单不存在")
 
         if (row[Orders.status] != "pending" || row[Orders.driverId] != null) {
             return@transaction GrabResult(success = false)
         }
 
-        // 使用乐观锁：检查状态后再更新
         val updated = Orders.update({
             (Orders.id eq orderId) and (Orders.status eq "pending") and (Orders.driverId.isNull())
         }) {
@@ -232,11 +239,34 @@ class OrderService {
         GrabResult(success = updated > 0)
     }
 
-    private fun rowToOrderDto(row: ResultRow): OrderDto {
-        val orderId = row[Orders.id]
-        val children = transaction {
-            OrderChildren.selectAll().where { OrderChildren.orderId eq orderId }
-                .map { childRow ->
+    private fun checkDriverEligibility(driverId: UUID) {
+        val driver = Drivers.selectAll().where { Drivers.id eq driverId }.firstOrNull()
+            ?: throw BusinessException(4001, "司机不存在")
+
+        val driverStatus = driver[Drivers.status]
+        if (driverStatus != "active" && driverStatus != "approved") {
+            throw BusinessException(4006, "未完成认证，不能接单（当前状态：$driverStatus）")
+        }
+
+        val examPassed = ExamResults.selectAll().where {
+            (ExamResults.driverId eq driverId) and (ExamResults.passed eq true)
+        }.firstOrNull()
+
+        if (examPassed == null) {
+            throw BusinessException(4007, "未通过培训考试，不能接单")
+        }
+    }
+
+    private fun batchBuildOrderDtos(rows: List<ResultRow>): List<OrderDto> {
+        if (rows.isEmpty()) return emptyList()
+
+        val orderIds = rows.map { it[Orders.id] }
+
+        val childrenByOrder = OrderChildren.selectAll()
+            .where { OrderChildren.orderId inList orderIds }
+            .groupBy { it[OrderChildren.orderId] }
+            .mapValues { (_, childRows) ->
+                childRows.map { childRow ->
                     ChildDto(
                         id = childRow[OrderChildren.id].toString(),
                         name = childRow[OrderChildren.childName],
@@ -248,45 +278,48 @@ class OrderService {
                         specialNotes = childRow[OrderChildren.specialNotes]
                     )
                 }
+            }
+
+        return rows.map { row ->
+            val orderId = row[Orders.id]
+            val children = childrenByOrder[orderId] ?: emptyList()
+            val parentInfo = loadParentInfo(row[Orders.parentId])
+
+            OrderDto(
+                id = orderId.toString(),
+                orderNo = row[Orders.orderNo],
+                status = row[Orders.status],
+                type = row[Orders.type] ?: row[Orders.orderType].toString(),
+                pickupLocation = LocationDto(
+                    address = row[Orders.pickupAddress],
+                    latitude = row[Orders.pickupLat].toDouble(),
+                    longitude = row[Orders.pickupLng].toDouble(),
+                    name = row[Orders.pickupLocationName] ?: ""
+                ),
+                dropOffLocation = LocationDto(
+                    address = row[Orders.dropoffAddress],
+                    latitude = row[Orders.dropoffLat].toDouble(),
+                    longitude = row[Orders.dropoffLng].toDouble(),
+                    name = row[Orders.dropoffLocationName] ?: ""
+                ),
+                pickupTime = row[Orders.pickupTime].format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                pickupDate = row[Orders.pickupDate]?.toString() ?: "",
+                children = children,
+                parent = parentInfo,
+                amount = AmountDto(
+                    total = row[Orders.totalAmount].toDouble(),
+                    platformFee = row[Orders.platformFee]?.toDouble() ?: 0.0,
+                    income = row[Orders.driverIncome]?.toDouble() ?: 0.0
+                ),
+                specialRequirements = row[Orders.specialRequirements],
+                distance = row[Orders.distance]?.toDouble() ?: 0.0,
+                schoolName = row[Orders.schoolName] ?: ""
+            )
         }
-
-        val parentInfo = loadParentInfo(row[Orders.parentId])
-
-        return OrderDto(
-            id = orderId.toString(),
-            orderNo = row[Orders.orderNo],
-            status = row[Orders.status],
-            type = row[Orders.type] ?: row[Orders.orderType].toString(),
-            pickupLocation = LocationDto(
-                address = row[Orders.pickupAddress],
-                latitude = row[Orders.pickupLat].toDouble(),
-                longitude = row[Orders.pickupLng].toDouble(),
-                name = row[Orders.pickupLocationName] ?: ""
-            ),
-            dropOffLocation = LocationDto(
-                address = row[Orders.dropoffAddress],
-                latitude = row[Orders.dropoffLat].toDouble(),
-                longitude = row[Orders.dropoffLng].toDouble(),
-                name = row[Orders.dropoffLocationName] ?: ""
-            ),
-            pickupTime = row[Orders.pickupTime].format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            pickupDate = row[Orders.pickupDate]?.toString() ?: "",
-            children = children,
-            parent = parentInfo,
-            amount = AmountDto(
-                total = row[Orders.totalAmount].toDouble(),
-                platformFee = row[Orders.platformFee]?.toDouble() ?: 0.0,
-                income = row[Orders.driverIncome]?.toDouble() ?: 0.0
-            ),
-            specialRequirements = row[Orders.specialRequirements],
-            distance = row[Orders.distance]?.toDouble() ?: 0.0,
-            schoolName = row[Orders.schoolName] ?: ""
-        )
     }
 
     private fun loadParentInfo(parentId: UUID?): ParentDto {
         if (parentId == null) return ParentDto(id = "", name = "", phone = "", rating = 0.0)
-        // 阶段1：家长表不在当前范围，返回模拟数据
         return ParentDto(
             id = parentId.toString(),
             name = "家长用户",

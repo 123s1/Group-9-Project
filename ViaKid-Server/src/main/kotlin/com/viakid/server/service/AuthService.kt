@@ -41,15 +41,13 @@ class AuthService(private val appConfig: AppConfig) {
 
     fun login(request: LoginRequest): AuthData = transaction {
         val driver = Drivers.selectAll().where { Drivers.phone eq request.phone }.firstOrNull()
+            ?: throw BusinessException(ErrorCodes.USER_NOT_FOUND, "用户不存在，请先注册")
 
-        val driverId = if (driver == null) {
-            createDriver(request.phone, request.password, request.deviceId)
-        } else {
-            if (!HashUtil.verify(request.password, driver[Drivers.passwordHash])) {
-                throw BusinessException(ErrorCodes.PASSWORD_ERROR, "密码错误")
-            }
-            driver[Drivers.id].value
+        if (!HashUtil.verify(request.password, driver[Drivers.passwordHash])) {
+            throw BusinessException(ErrorCodes.PASSWORD_ERROR, "密码错误")
         }
+
+        val driverId = driver[Drivers.id].value
 
         Drivers.update({ Drivers.id eq driverId }) {
             it[deviceId] = request.deviceId

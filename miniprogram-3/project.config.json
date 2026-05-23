@@ -47,5 +47,6 @@
     "ignore": [],
     "include": []
   },
-  "appid": "wx8805113126abffb8"
+  "appid": "wx8805113126abffb8",
+  "_comment_appid": "如需使用个人 appid，请在 project.private.config.json 中覆盖"
 }

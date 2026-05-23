@@ -72,3 +72,6 @@ dist-ssr
 /local.properties
 local.properties
 /uploads
+
+# 小程序本地配置
+project.private.config.json
