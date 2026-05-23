@@ -1,0 +1,98 @@
+<view class="container">
+    <!-- 订单信息卡片 -->
+    <view class="order-info-card">
+        <view class="order-title">订单信息</view>
+        <view class="info-row">
+            <text class="label">订单编号：</text>
+            <text class="value">{{orderNo}}</text>
+        </view>
+        <view class="info-row">
+            <text class="label">服务类型：</text>
+            <text class="value">{{serviceType}}</text>
+        </view>
+        <view class="info-row">
+            <text class="label">孩子姓名：</text>
+            <text class="value">{{childName}}</text>
+        </view>
+        <view class="info-row">
+            <text class="label">接送时间：</text>
+            <text class="value">{{scheduleTime}}</text>
+        </view>
+    </view>
+
+    <!-- 支付金额卡片 -->
+    <view class="amount-card">
+        <view class="amount-label">支付金额</view>
+        <view class="amount-value">
+            <text class="currency">¥</text>
+            <text class="price">{{amount}}</text>
+        </view>
+    </view>
+
+    <!-- 支付方式选择 -->
+    <view class="payment-methods">
+        <view class="method-title">选择支付方式</view>
+
+        <!-- 微信支付 -->
+        <view class="method-item selected" bindtap="selectPayment" data-type="wechat">
+            <view class="method-left">
+                <view class="method-icon wechat-icon">💬</view>
+                <view class="method-info">
+                    <text class="method-name">微信支付</text>
+                    <text class="method-desc">推荐</text>
+                </view>
+            </view>
+            <view class="check-icon">✓</view>
+        </view>
+
+        <!-- 支付宝 -->
+        <view class="method-item" bindtap="selectPayment" data-type="alipay">
+            <view class="method-left">
+                <view class="method-icon alipay-icon">💙</view>
+                <view class="method-info">
+                    <text class="method-name">支付宝</text>
+                </view>
+            </view>
+            <view class="check-icon"></view>
+        </view>
+
+        <!-- 银行卡 -->
+        <view class="method-item" bindtap="selectPayment" data-type="card">
+            <view class="method-left">
+                <view class="method-icon card-icon">💳</view>
+                <view class="method-info">
+                    <text class="method-name">银行卡</text>
+                </view>
+            </view>
+            <view class="check-icon"></view>
+        </view>
+    </view>
+
+    <!-- 二维码区域 -->
+    <view class="qrcode-section" wx:if="{{selectedPayment === 'wechat'}}">
+        <view class="qrcode-title">请使用微信扫描下方二维码</view>
+        <view class="qrcode-wrapper">
+            <image
+                    class="qrcode-image"
+                    src="{{qrcodeUrl}}"
+                    mode="aspectFit"
+                    bindtap="previewQrcode"
+            ></image>
+        </view>
+        <view class="qrcode-tips">
+            <text class="tip-item">⏱ 二维码有效期30分钟</text>
+            <text class="tip-item">🔒 安全支付保障</text>
+        </view>
+    </view>
+
+    <!-- 立即支付按钮 -->
+    <view class="pay-button-wrapper">
+        <button class="pay-button" bindtap="confirmPayment">确认支付 ¥{{amount}}</button>
+    </view>
+
+    <!-- 安全提示 -->
+    <view class="security-tips">
+        <text class="security-icon">🔒</text>
+        <text class="security-text">支付安全由微信支付提供保障</text>
+    </view>
+</view>

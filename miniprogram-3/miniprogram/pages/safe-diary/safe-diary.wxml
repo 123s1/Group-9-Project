@@ -1,0 +1,116 @@
+<view class="container">
+    <!-- 页面标题 -->
+    <view class="page-header">
+        <view class="header-content">
+            <text class="header-title">记录宝贝的每一次接送</text>
+            <text class="header-subtitle">安全守护·温馨回忆</text>
+        </view>
+    </view>
+
+    <!-- 日记列表 -->
+    <view class="diary-list" wx:if="{{diaryList.length > 0}}">
+        <view
+                class="diary-item"
+                wx:for="{{diaryList}}"
+                wx:key="id"
+                bindtap="playVideo"
+                data-index="{{index}}"
+        >
+            <!-- 视频封面 -->
+            <view class="diary-cover">
+                <image
+                        class="cover-image"
+                        src="{{item.coverUrl}}"
+                        mode="aspectFill"
+                        binderror="onCoverError"
+                        data-index="{{index}}"
+                ></image>
+                <view class="play-button">
+                    <text class="play-icon">▶</text>
+                </view>
+                <view class="duration-tag">{{item.duration}}</view>
+            </view>
+
+            <!-- 日记信息 -->
+            <view class="diary-info">
+                <view class="diary-header">
+                    <text class="diary-title">{{item.title}}</text>
+                    <view class="diary-tag {{item.typeClass}}">{{item.typeName}}</view>
+                </view>
+                <view class="diary-meta">
+                    <text class="meta-item">
+                        <text class="meta-icon">👶</text>
+                        {{item.childName}}
+                    </text>
+                    <text class="meta-item">
+                        <text class="meta-icon">📅</text>
+                        {{item.date}}
+                    </text>
+                    <text class="meta-item">
+                        <text class="meta-icon">⏰</text>
+                        {{item.time}}
+                    </text>
+                </view>
+                <view class="diary-desc">{{item.description}}</view>
+                <view class="diary-footer">
+                    <view class="escort-info">
+                        <image class="escort-avatar" src="{{item.escortAvatar}}" mode="aspectFill"></image>
+                        <text class="escort-name">{{item.escortName}}</text>
+                    </view>
+                    <view class="diary-actions">
+                        <text class="action-item">❤️ {{item.likeCount}}</text>
+                        <text class="action-item">💬 {{item.commentCount}}</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{diaryList.length === 0 && !isLoading}}">
+        <view class="empty-icon">📹</view>
+        <text class="empty-title">暂无安心日记</text>
+        <text class="empty-desc">当宝贝完成接送后，系统会自动生成安心日记</text>
+        <button class="refresh-btn" bindtap="refreshDiary">刷新看看</button>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 视频播放器弹窗 -->
+    <view class="video-modal" wx:if="{{showVideoPlayer}}" catchtouchmove="preventTouchMove">
+        <view class="video-wrapper">
+            <view class="video-header">
+                <text class="video-title">{{currentVideo.title}}</text>
+                <view class="close-btn" bindtap="closeVideo">✕</view>
+            </view>
+            <video
+                    id="videoPlayer"
+                    class="video-player"
+                    src="{{currentVideo.videoUrl}}"
+                    controls
+                    autoplay
+                    show-center-play-btn
+                    show-fullscreen-btn
+                    enable-danmu
+                    danmu-list="{{danmuList}}"
+                    bindended="onVideoEnded"
+                    binderror="onVideoError"
+            ></video>
+            <view class="video-footer">
+                <view class="video-info">
+                    <text class="info-text">👶 {{currentVideo.childName}}</text>
+                    <text class="info-text">📅 {{currentVideo.date}} {{currentVideo.time}}</text>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 底部提示 -->
+    <view class="bottom-tip" wx:if="{{diaryList.length > 0}}">
+        <text class="tip-text">已加载 {{diaryList.length}} 条安心日记</text>
+    </view>
+</view>

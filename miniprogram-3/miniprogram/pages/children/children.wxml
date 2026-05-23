@@ -1,0 +1,285 @@
+<wxs src="../../utils/string.wxs" module="str"/>
+<view class="container">
+    <!-- 添加孩子按钮 -->
+    <view class="add-btn" bindtap="showAddModal">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加孩子</text>
+    </view>
+
+    <!-- 孩子列表 -->
+    <view class="children-list" wx:if="{{children.length > 0}}">
+        <view class="child-card" wx:for="{{children}}" wx:key="id" bindtap="viewChildDetail" data-id="{{item.id}}">
+            <view class="child-header">
+                <view class="child-avatar" style="background: {{item.avatarColor}};">
+                    <text class="avatar-text">{{str.firstCharUpper(item.name)}}</text>
+                </view>
+                <view class="child-info">
+                    <view class="child-top">
+                        <text class="child-name">{{item.name}}</text>
+                        <view class="gender-tag {{item.gender === 'male' ? 'male' : 'female'}}">
+                            <text>{{item.gender === 'male' ? '👦' : '👧'}}</text>
+                        </view>
+                    </view>
+                    <text class="child-school">{{item.school}}</text>
+                </view>
+                <view class="child-status {{item.status}}">
+                    <text>{{item.statusText}}</text>
+                </view>
+            </view>
+
+            <!-- 兴趣标签 -->
+            <view class="interest-tags">
+                <text class="interest-tag" wx:for="{{item.interests}}" wx:for-item="tag" wx:key="tag">{{tag}}</text>
+                <view class="add-tag-btn" catchtap="editInterests" data-id="{{item.id}}">
+                    <text>+ 编辑标签</text>
+                </view>
+            </view>
+
+            <!-- 快捷操作 -->
+            <view class="child-actions">
+                <view class="action-item" catchtap="goToSafeDiary" data-id="{{item.id}}">
+                    <text class="action-icon">📹</text>
+                    <text class="action-text">安心日记</text>
+                </view>
+                <view class="action-item" catchtap="goToRecommendations" data-id="{{item.id}}">
+                    <text class="action-icon">🎯</text>
+                    <text class="action-text">个性推荐</text>
+                </view>
+                <view class="action-item" catchtap="editChild" data-id="{{item.id}}">
+                    <text class="action-icon">✏️</text>
+                    <text class="action-text">编辑</text>
+                </view>
+                <view class="action-item delete" catchtap="deleteChild" data-id="{{item.id}}">
+                    <text class="action-icon">🗑️</text>
+                    <text class="action-text">删除</text>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+        <view class="empty-icon">👶</view>
+        <text class="empty-title">还没有添加孩子</text>
+        <text class="empty-desc">点击上方按钮添加您的孩子信息</text>
+        <view class="empty-btn" bindtap="showAddModal">
+            <text>添加孩子</text>
+        </view>
+    </view>
+
+    <!-- 个性化推荐区域 -->
+    <view class="recommendations-section" wx:if="{{children.length > 0 && currentChild}}">
+        <view class="section-header">
+            <view class="section-title">
+                <text class="title-icon">🎯</text>
+                <text class="title-text">{{currentChild.name}}的个性推荐</text>
+            </view>
+            <view class="switch-child" bindtap="showChildPicker">
+                <text>切换孩子 ›</text>
+            </view>
+        </view>
+
+        <!-- 推荐内容标签 -->
+        <view class="interest-filter">
+            <view class="filter-item {{selectedFilter === 'all' ? 'active' : ''}}" bindtap="filterRecs" data-type="all">全部</view>
+            <view class="filter-item {{selectedFilter === 'class' ? 'active' : ''}}" bindtap="filterRecs" data-type="class">兴趣班</view>
+            <view class="filter-item {{selectedFilter === 'book' ? 'active' : ''}}" bindtap="filterRecs" data-type="book">绘本</view>
+            <view class="filter-item {{selectedFilter === 'activity' ? 'active' : ''}}" bindtap="filterRecs" data-type="activity">周末活动</view>
+        </view>
+
+        <!-- 推荐列表 -->
+        <view class="rec-list">
+            <!-- 兴趣班推荐 -->
+            <view class="rec-card" wx:for="{{filteredRecommendations}}" wx:key="id" wx:if="{{item.type === 'class'}}">
+                <view class="rec-badge class-badge">兴趣班</view>
+                <view class="rec-content">
+                    <text class="rec-title">{{item.title}}</text>
+                    <text class="rec-desc">{{item.desc}}</text>
+                    <view class="rec-tags">
+                        <text class="rec-tag" wx:for="{{item.matchTags}}" wx:for-item="tag">{{tag}}</text>
+                    </view>
+                    <view class="rec-info">
+                        <text class="rec-location">📍 {{item.location}}</text>
+                        <text class="rec-price">{{item.price}}</text>
+                    </view>
+                </view>
+                <view class="rec-action">
+                    <text class="rec-btn">查看详情</text>
+                </view>
+            </view>
+
+            <!-- 绘本推荐 -->
+            <view class="rec-card" wx:for="{{filteredRecommendations}}" wx:key="id" wx:if="{{item.type === 'book'}}">
+                <view class="rec-badge book-badge">绘本</view>
+                <view class="rec-content">
+                    <text class="rec-title">{{item.title}}</text>
+                    <text class="rec-desc">{{item.desc}}</text>
+                    <view class="rec-tags">
+                        <text class="rec-tag" wx:for="{{item.matchTags}}" wx:for-item="tag">{{tag}}</text>
+                    </view>
+                    <view class="rec-info">
+                        <text class="rec-author">✍️ {{item.author}}</text>
+                        <text class="rec-age">适读：{{item.ageRange}}</text>
+                    </view>
+                </view>
+                <view class="rec-action">
+                    <text class="rec-btn">查看详情</text>
+                </view>
+            </view>
+
+            <!-- 周末活动推荐 -->
+            <view class="rec-card" wx:for="{{filteredRecommendations}}" wx:key="id" wx:if="{{item.type === 'activity'}}">
+                <view class="rec-badge activity-badge">周末活动</view>
+                <view class="rec-content">
+                    <text class="rec-title">{{item.title}}</text>
+                    <text class="rec-desc">{{item.desc}}</text>
+                    <view class="rec-tags">
+                        <text class="rec-tag" wx:for="{{item.matchTags}}" wx:for-item="tag">{{tag}}</text>
+                    </view>
+                    <view class="rec-info">
+                        <text class="rec-time">📅 {{item.time}}</text>
+                        <text class="rec-price">{{item.price}}</text>
+                    </view>
+                </view>
+                <view class="rec-action">
+                    <text class="rec-btn">查看详情</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 无推荐提示 -->
+        <view class="no-recs" wx:if="{{filteredRecommendations.length === 0}}">
+            <text class="no-recs-text">暂无相关推荐</text>
+            <text class="no-recs-tip">完善孩子的兴趣标签，获取更多个性化推荐</text>
+        </view>
+    </view>
+
+    <!-- 添加/编辑孩子弹窗 -->
+    <view class="modal {{showAddModal ? 'show' : ''}}" catchtap="hideAddModal">
+        <view class="modal-content" catchtap="preventBubble">
+            <view class="modal-header">
+                <text class="modal-title">{{isEditing ? '编辑孩子信息' : '添加孩子'}}</text>
+                <text class="modal-close" catchtap="hideAddModal">×</text>
+            </view>
+            <view class="modal-body">
+                <view class="form-item">
+                    <text class="form-label">姓名
+                        <text class="required">*</text>
+                    </text>
+                    <input class="form-input" placeholder="请输入孩子姓名" bindinput="onNameInput" value="{{formData.name}}"/>
+                </view>
+
+                <view class="form-item">
+                    <text class="form-label">性别
+                        <text class="required">*</text>
+                    </text>
+                    <view class="gender-select">
+                        <view class="gender-option {{formData.gender === 'male' ? 'active' : ''}}" bindtap="selectGender" data-gender="male">
+                            <text>👦 男</text>
+                        </view>
+                        <view class="gender-option {{formData.gender === 'female' ? 'active' : ''}}" bindtap="selectGender" data-gender="female">
+                            <text>👧 女</text>
+                        </view>
+                    </view>
+                </view>
+
+                <view class="form-item">
+                    <text class="form-label">学校
+                        <text class="required">*</text>
+                    </text>
+                    <input class="form-input" placeholder="请输入学校名称" bindinput="onSchoolInput" value="{{formData.school}}"/>
+                </view>
+
+                <view class="form-item">
+                    <text class="form-label">年级/班级</text>
+                    <input class="form-input" placeholder="如：一年级(1)班" bindinput="onGradeInput" value="{{formData.grade}}"/>
+                </view>
+
+                <view class="form-item">
+                    <text class="form-label">出生日期</text>
+                    <picker mode="date" bindchange="onBirthdayChange" value="{{formData.birthday}}">
+                        <view class="picker-value {{formData.birthday ? '' : 'placeholder'}}">
+                            {{formData.birthday || '请选择出生日期'}}
+                        </view>
+                    </picker>
+                </view>
+
+                <view class="form-item">
+                    <text class="form-label">兴趣标签</text>
+                    <view class="interest-selector">
+                        <view class="interest-option {{formData.interests.includes(item) ? 'active' : ''}}"
+                              wx:for="{{availableInterests}}"
+                              wx:key="item"
+                              bindtap="toggleInterest"
+                              data-interest="{{item}}">
+                            {{item}}
+                        </view>
+                    </view>
+                </view>
+
+                <view class="form-item">
+                    <text class="form-label">备注</text>
+                    <textarea class="form-textarea" placeholder="孩子的特殊情况、过敏信息等" bindinput="onRemarkInput" value="{{formData.remark}}"></textarea>
+                </view>
+
+                <view class="modal-footer">
+                    <view class="btn-cancel" catchtap="hideAddModal">取消</view>
+                    <view class="btn-confirm" bindtap="saveChild">{{isEditing ? '保存' : '添加'}}</view>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 编辑兴趣标签弹窗 -->
+    <view class="modal {{showInterestModal ? 'show' : ''}}" catchtap="hideInterestModal">
+        <view class="modal-content small" catchtap="preventBubble">
+            <view class="modal-header">
+                <text class="modal-title">编辑兴趣标签</text>
+                <text class="modal-close" catchtap="hideInterestModal">×</text>
+            </view>
+            <view class="modal-body">
+                <view class="interest-selector">
+                    <view class="interest-option {{selectedInterests.includes(item) ? 'active' : ''}}"
+                          wx:for="{{availableInterests}}"
+                          wx:key="item"
+                          bindtap="toggleInterestEdit"
+                          data-interest="{{item}}">
+                        {{item}}
+                    </view>
+                </view>
+                <view class="modal-footer">
+                    <view class="btn-cancel" catchtap="hideInterestModal">取消</view>
+                    <view class="btn-confirm" bindtap="saveInterests">保存</view>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 孩子选择器弹窗 -->
+    <view class="modal {{showChildPickerModal ? 'show' : ''}}" catchtap="hideChildPicker">
+        <view class="modal-content small" catchtap="preventBubble">
+            <view class="modal-header">
+                <text class="modal-title">选择孩子</text>
+                <text class="modal-close" catchtap="hideChildPicker">×</text>
+            </view>
+            <view class="modal-body">
+                <view class="child-picker-list">
+                    <view class="picker-item {{currentChildId === item.id ? 'active' : ''}}"
+                          wx:for="{{children}}"
+                          wx:key="id"
+                          bindtap="selectChild"
+                          data-id="{{item.id}}">
+                        <view class="picker-avatar" style="background: {{item.avatarColor}};">
+                            <text>{{str.firstCharUpper(item.name)}}</text>
+                        </view>
+                        <view class="picker-info">
+                            <text class="picker-name">{{item.name}}</text>
+                            <text class="picker-school">{{item.school}}</text>
+                        </view>
+                        <view class="picker-check" wx:if="{{currentChildId === item.id}}">✓</view>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+</view>

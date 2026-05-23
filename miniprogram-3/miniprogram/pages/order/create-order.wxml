@@ -1,0 +1,134 @@
+<view class="container">
+    <form bindsubmit="submitOrder">
+        <!-- 接送类型 -->
+        <view class="card">
+            <view class="form-title">接送类型</view>
+            <view class="type-selector">
+                <view class="type-item {{orderType === 'pickup' ? 'active' : ''}}" bindtap="selectType" data-type="pickup">
+                    <text>放学接</text>
+                    <text class="desc">从学校接到家</text>
+                </view>
+                <view class="type-item {{orderType === 'dropoff' ? 'active' : ''}}" bindtap="selectType" data-type="dropoff">
+                    <text>上学送</text>
+                    <text class="desc">从家送到学校</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 选择孩子 -->
+        <view class="card">
+            <view class="form-title">选择孩子</view>
+            <picker mode="selector" range="{{children}}" range-key="name" bindchange="selectChild">
+                <view class="picker-value">
+                    {{selectedChild.name || '请选择孩子'}}
+                    <text class="arrow">></text>
+                </view>
+            </picker>
+        </view>
+
+        <!-- 接送日期 -->
+        <view class="card">
+            <view class="form-title">接送日期</view>
+            <picker mode="date" start="{{today}}" bindchange="selectDate">
+                <view class="picker-value">
+                    {{orderDate || '请选择日期'}}
+                    <text class="arrow">></text>
+                </view>
+            </picker>
+        </view>
+
+        <!-- 接送时间 -->
+        <view class="card">
+            <view class="form-title">接送时间</view>
+            <picker mode="time" bindchange="selectTime">
+                <view class="picker-value">
+                    {{orderTime || '请选择时间'}}
+                    <text class="arrow">></text>
+                </view>
+            </picker>
+        </view>
+
+        <!-- 地点选择 -->
+        <view class="card">
+            <view class="form-title">起点</view>
+            <view class="location-item" bindtap="selectStartLocation">
+                <text class="location-label">{{orderType === 'pickup' ? '学校' : '家'}}</text>
+                <text class="location-value">{{startLocation.address || '请选择位置'}}</text>
+            </view>
+        </view>
+
+        <view class="card">
+            <view class="form-title">终点</view>
+            <view class="location-item" bindtap="selectEndLocation">
+                <text class="location-label">{{orderType === 'pickup' ? '家' : '学校'}}</text>
+                <text class="location-value">{{endLocation.address || '请选择位置'}}</text>
+            </view>
+        </view>
+
+        <!-- 增值服务 -->
+        <view class="card">
+            <view class="form-title">增值服务</view>
+            <view class="service-item" wx:for="{{services}}" wx:key="id">
+                <view class="service-info">
+                    <text class="service-name">{{item.name}}</text>
+                    <text class="service-desc">{{item.desc}}</text>
+                </view>
+                <view class="service-price">
+                    <text class="price">+{{item.price}}元</text>
+                    <switch checked="{{item.selected}}" bindchange="toggleService" data-id="{{item.id}}" color="#FF9A56"/>
+                </view>
+            </view>
+        </view>
+
+        <!-- 特殊备注 -->
+        <view class="card">
+            <view class="form-title">特殊备注</view>
+            <textarea placeholder="如：孩子今天有钢琴课，需带琴谱" bindinput="inputRemark" maxlength="200" auto-height/>
+        </view>
+
+        <!-- 订单类型 -->
+        <view class="card">
+            <view class="form-title">订单类型</view>
+            <view class="package-list">
+                <view class="package-item {{packageType === 'single' ? 'active' : ''}}" bindtap="selectPackage" data-type="single">
+                    <text class="package-name">单次</text>
+                    <text class="package-price">58元</text>
+                </view>
+                <view class="package-item {{packageType === 'week' ? 'active' : ''}}" bindtap="selectPackage" data-type="week">
+                    <text class="package-name">包周</text>
+                    <text class="package-price">258元/5次</text>
+                    <text class="package-save">省32元</text>
+                </view>
+                <view class="package-item {{packageType === 'month' ? 'active' : ''}}" bindtap="selectPackage" data-type="month">
+                    <text class="package-name">包月</text>
+                    <text class="package-price">980元/22次</text>
+                    <text class="package-save">省296元</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 费用明细 -->
+        <view class="card">
+            <view class="form-title">费用明细</view>
+            <view class="price-detail">
+                <view class="price-row">
+                    <text>订单金额</text>
+                    <text>{{basePrice}}元</text>
+                </view>
+                <view class="price-row" wx:if="{{servicesPrice > 0}}">
+                    <text>增值服务</text>
+                    <text>+{{servicesPrice}}元</text>
+                </view>
+                <view class="price-row total">
+                    <text>合计</text>
+                    <text class="total-price">{{totalPrice}}元</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 提交按钮 -->
+        <view class="submit-btn">
+            <button form-type="submit" class="btn-primary">提交订单</button>
+        </view>
+    </form>
+</view>

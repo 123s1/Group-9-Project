@@ -1,0 +1,74 @@
+﻿# Windows
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# mac OS
+.DS_Store
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+
+# CodeBuddy
+/.codebuddy
+
+# Visual Studio
+/.vs
+.vscode/*
+.vscode
+*.sln
+
+# JetBrains
+*.iml
+/.idea
+
+# Junction
+/Junction-ViaKidAdmin
+/Junction-ViaKidDataBase
+/Junction-ViaKidDriver
+/Junction-ViaKidParent
+/Junction-ViaKidServer
+文档
+
+# 生成
+.gradle
+/.gradle
+/.kotlin
+/app/build
+/app/release
+/build
+/dev
+/prod
+
+# 冗余
+/.idea/assetWizardSettings.xml
+/.idea/caches
+/.idea/libraries
+/.idea/MarsCodeWorkspaceAppSettings.xml
+/.idea/modules.xml
+/.idea/navEditor.xml
+/.idea/workspace.xml
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node.js
+node_modules
+dist
+dist-ssr
+*.local
+
+# 其他
+.cxx
+.externalNativeBuild
+/captures
+/local.properties
+local.properties
+/uploads

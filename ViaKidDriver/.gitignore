@@ -1,0 +1,92 @@
+﻿# Windows
+[Dd]esktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# mac OS
+.DS_Store
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+
+# CodeBuddy
+/.codebuddy
+
+# Visual Studio
+/.vs
+.vscode/*
+.vscode
+*.sln
+
+# JetBrains
+*.iml
+/.idea
+
+# Junction
+/Junction-ViaKidAdmin
+/Junction-ViaKidDataBase
+/Junction-ViaKidDriver
+/Junction-ViaKidParent
+/Junction-ViaKidServer
+/文档
+
+# 生成
+.gradle
+/.gradle
+/.kotlin
+/app/build
+/app/release
+/build
+/dev
+/prod
+
+# 冗余
+/.idea/assetWizardSettings.xml
+/.idea/caches
+/.idea/libraries
+/.idea/MarsCodeWorkspaceAppSettings.xml
+/.idea/modules.xml
+/.idea/navEditor.xml
+/.idea/workspace.xml
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node.js
+node_modules
+dist
+dist-ssr
+*.local
+
+# 其他
+.cxx
+.externalNativeBuild
+/captures
+/local.properties
+local.properties
+/uploads
+/文档/
+/文档/API接口契约-专员端-阶段1.md
+/文档/UI-UX原型与交互说明书-专员端-总.md
+/文档/UI-UX原型与交互说明书-专员端-阶段1.md
+/文档/UI-UX原型与交互说明书-专员端-阶段2.md
+/文档/UI-UX原型与交互说明书-专员端-阶段3.md
+/文档/功能说明书-专员端-总.md
+/文档/功能说明书-专员端-阶段1.md
+/文档/功能说明书-专员端-阶段2.md
+/文档/功能说明书-专员端-阶段3.md
+/文档/软件需求规格说明书-专员端-总.md
+/文档/软件需求规格说明书-专员端-阶段1.md
+/文档/软件需求规格说明书-专员端-阶段2.md
+/文档/软件需求规格说明书-专员端-阶段3.md
+/文档/阅读家长端项目后生成的幻灯片大纲.md
+/文档/CHANGELOG.md
+/文档/error_tmp.txt
+build_output.txt

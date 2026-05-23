@@ -1,0 +1,29 @@
+/**
+ * 字符串工具 WXS 模块
+ * WXML 模板中无法直接调用 JS 原生方法，需通过 WXS 封装
+ */
+
+/**
+ * 将字符串转为大写
+ */
+function toUpperCase(str) {
+    if (typeof str !== 'string') {
+        return ''
+    }
+    return str.toUpperCase()
+}
+
+/**
+ * 获取字符串首字符的大写形式（常用于头像文字）
+ */
+function firstCharUpper(str) {
+    if (typeof str !== 'string' || str.length === 0) {
+        return ''
+    }
+    return str.charAt(0).toUpperCase()
+}
+
+module.exports = {
+    toUpperCase: toUpperCase,
+    firstCharUpper: firstCharUpper
+};

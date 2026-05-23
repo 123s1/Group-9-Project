@@ -1,0 +1,25 @@
+ktor:
+  deployment:
+    port: 8900
+    host: 0.0.0.0
+  application:
+    modules:
+      - com.viakid.server.ApplicationKt.module
+
+database:
+  driver: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+  url: "jdbc:sqlserver://localhost:1433;databaseName=ViaKidDB;encrypt=true;trustServerCertificate=true"
+  user: "sa"
+  password: "js64649Y"
+  poolSize: 10
+
+jwt:
+  secret: "viakid-server-secret-key-change-in-production"
+  issuer: "viakid-server"
+  audience: "viakid-app"
+  realm: "viakid-server"
+  accessTokenValidity: 3600000
+  refreshTokenValidity: 604800000
+
+file:
+  uploadDir: "uploads"

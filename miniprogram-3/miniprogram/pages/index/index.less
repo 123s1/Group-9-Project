@@ -1,0 +1,630 @@
+// 温馨暖色调变量
+@primary-color: #FF9A56;
+@primary-dark: #FF8533;
+@primary-light: #FFB088;
+@primary-gradient: linear-gradient(135deg, #FF9A56 0%, #FF7B3C 100%);
+@secondary-color: #6BCB77;
+@secondary-gradient: linear-gradient(135deg, #6BCB77 0%, #4CAF50 100%);
+
+// 文字颜色
+@text-primary: #333;
+@text-secondary: #666;
+@text-light: #999;
+@text-white: #fff;
+
+// 背景色
+@bg-main: #FFF8F3;
+@bg-card: #fff;
+@bg-warm: #FFF5ED;
+
+// 边框和阴影
+@border-light: #F5EDE6;
+@shadow-soft: 0 8rpx 32rpx rgba(255, 154, 86, 0.12);
+@shadow-card: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+
+// 圆角
+@radius-sm: 16rpx;
+@radius-md: 24rpx;
+@radius-lg: 32rpx;
+@radius-xl: 48rpx;
+
+// 通用样式
+//noinspection CssInvalidHtmlTagReference
+page {
+    background: linear-gradient(180deg, #FFF8F3 0%, #FFE8D6 100%);
+    min-height: 100vh;
+}
+
+
+
+.container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #FFF8F3 0%, #FFE8D6 100%);
+    padding: 0 30rpx 120rpx;
+    position: relative;
+}
+
+
+
+// 顶部背景装饰
+.page-header {
+    position: relative;
+    padding: 30rpx 0 0;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -60rpx;
+        left: -60rpx;
+        right: -60rpx;
+        height: 400rpx;
+        background: linear-gradient(180deg, rgba(255, 154, 86, 0.08) 0%, transparent 100%);
+        border-radius: 0 0 50% 50%;
+        pointer-events: none;
+    }
+}
+
+
+
+// 当前订单卡片
+.order-card {
+    background: @primary-gradient;
+    border-radius: @radius-lg;
+    padding: 36rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 12rpx 36rpx rgba(255, 138, 77, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.6s ease-out;
+
+    //noinspection DuplicatedCode
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300rpx;
+        height: 300rpx;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200rpx;
+        height: 200rpx;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28rpx;
+        position: relative;
+        z-index: 1;
+
+        .order-info {
+            display: flex;
+            align-items: center;
+            gap: 16rpx;
+
+            .order-label {
+                font-size: 26rpx;
+                color: rgba(255, 255, 255, 0.85);
+                background: rgba(255, 255, 255, 0.2);
+                padding: 6rpx 18rpx;
+                border-radius: 20rpx;
+                font-weight: 500;
+            }
+
+            .order-status {
+                font-size: 28rpx;
+                font-weight: 600;
+
+                &.status-success {
+                    color: #90EE90;
+                }
+
+                &.status-warning {
+                    color: #FFD700;
+                }
+
+                &.status-danger {
+                    color: #FF6B6B;
+                }
+
+                &.status-info {
+                    color: #87CEEB;
+                }
+            }
+        }
+
+        .order-time {
+            font-size: 26rpx;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    .order-detail {
+        margin-bottom: 36rpx;
+        position: relative;
+        z-index: 1;
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 18rpx;
+            font-size: 28rpx;
+
+            .label {
+                width: 140rpx;
+                color: rgba(255, 255, 255, 0.7);
+            }
+
+            .value {
+                flex: 1;
+                color: #fff;
+                font-weight: 500;
+            }
+        }
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 20rpx;
+        position: relative;
+        z-index: 1;
+
+        button {
+            flex: 1;
+            height: 76rpx;
+            line-height: 76rpx;
+            font-size: 28rpx;
+            border-radius: 38rpx;
+            margin: 0;
+
+            &.btn-outline {
+                background: transparent;
+                border: 2rpx solid rgba(255, 255, 255, 0.5);
+                color: #fff;
+
+                &::after {
+                    border: none;
+                }
+            }
+
+            &.btn-primary {
+                background: #fff;
+                color: @primary-color;
+                font-weight: 600;
+
+                &::after {
+                    border: none;
+                }
+            }
+        }
+    }
+}
+
+
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+// 快捷服务卡片
+.quick-card {
+    background: @bg-card;
+    border-radius: @radius-lg;
+    padding: 36rpx;
+    margin-bottom: 30rpx;
+    box-shadow: @shadow-soft;
+
+    .section-title {
+        margin-bottom: 28rpx;
+
+        .title {
+            font-size: 34rpx;
+            font-weight: 700;
+            color: @text-primary;
+        }
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20rpx;
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14rpx;
+            padding: 16rpx 8rpx;
+            transition: transform 0.2s ease;
+
+            &:active {
+                transform: scale(0.95);
+            }
+
+            .action-icon {
+                width: 96rpx;
+                height: 96rpx;
+                background: linear-gradient(135deg, #FFF5ED 0%, #FFE4D4 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 48rpx;
+                box-shadow: 0 4rpx 12rpx rgba(255, 154, 86, 0.15);
+            }
+
+            .action-text {
+                font-size: 24rpx;
+                color: @text-secondary;
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+
+
+// 会员卡片
+.member-card {
+    background: @bg-card;
+    border-radius: @radius-lg;
+    padding: 36rpx;
+    margin-bottom: 30rpx;
+    box-shadow: @shadow-soft;
+
+    .member-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 28rpx;
+
+        .avatar {
+            width: 96rpx;
+            height: 96rpx;
+            border-radius: 50%;
+            margin-right: 24rpx;
+            background: linear-gradient(135deg, #FFE4D4, #FFD4B2);
+            border: 4rpx solid #fff;
+            box-shadow: 0 4rpx 16rpx rgba(255, 154, 86, 0.2);
+            overflow: hidden;
+        }
+
+        .member-info {
+            flex: 1;
+
+            .nickname {
+                display: block;
+                font-size: 34rpx;
+                font-weight: 700;
+                color: @text-primary;
+                margin-bottom: 10rpx;
+            }
+
+            .level-tag {
+                display: inline-flex;
+                align-items: center;
+                font-size: 22rpx;
+                padding: 6rpx 18rpx;
+                border-radius: 20rpx;
+                font-weight: 500;
+
+                &.silver {
+                    background: linear-gradient(135deg, #F5F5F5, #E8E8E8);
+                    color: #8B8B8B;
+                }
+
+                &.gold {
+                    background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+                    color: #FF8F00;
+                }
+
+                &.diamond {
+                    background: linear-gradient(135deg, #E0F7FA, #B2EBF2);
+                    color: #00ACC1;
+                }
+            }
+        }
+
+        .arrow {
+            font-size: 48rpx;
+            color: #DDD;
+            font-weight: 300;
+        }
+    }
+
+    .member-progress {
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24rpx;
+            color: @text-light;
+            margin-bottom: 14rpx;
+        }
+
+        .progress-bar {
+            height: 14rpx;
+            background: #F5EDE6;
+            border-radius: 7rpx;
+            overflow: hidden;
+
+            .progress-fill {
+                height: 100%;
+                background: @primary-gradient;
+                border-radius: 7rpx;
+                transition: width 0.5s ease;
+                position: relative;
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 50%;
+                    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+                    border-radius: 7rpx 7rpx 0 0;
+                }
+            }
+        }
+    }
+}
+
+
+
+// 服务推荐卡片
+//noinspection DuplicatedCode
+.service-card {
+    background: @bg-card;
+    border-radius: @radius-lg;
+    padding: 36rpx;
+    margin-bottom: 30rpx;
+    box-shadow: @shadow-soft;
+
+    .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28rpx;
+
+        .title {
+            font-size: 34rpx;
+            font-weight: 700;
+            color: @text-primary;
+        }
+
+        .more {
+            font-size: 26rpx;
+            color: @primary-color;
+            font-weight: 500;
+        }
+    }
+
+    .service-scroll {
+        white-space: nowrap;
+
+        .service-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            width: 180rpx;
+            margin-right: 24rpx;
+
+            &:active {
+                transform: scale(0.95);
+            }
+
+            .service-icon {
+                width: 110rpx;
+                height: 110rpx;
+                background: linear-gradient(135deg, #FFF5ED 0%, #FFE4D4 100%);
+                border-radius: 28rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 52rpx;
+                margin-bottom: 14rpx;
+                box-shadow: 0 4rpx 12rpx rgba(255, 154, 86, 0.12);
+            }
+
+            .service-name {
+                display: block;
+                font-size: 26rpx;
+                color: @text-primary;
+                margin-bottom: 6rpx;
+                font-weight: 500;
+            }
+
+            .service-price {
+                font-size: 24rpx;
+                color: @primary-color;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+
+
+// 安心日记卡片
+//noinspection DuplicatedCode
+.diary-card {
+    background: @bg-card;
+    border-radius: @radius-lg;
+    padding: 36rpx;
+    margin-bottom: 30rpx;
+    box-shadow: @shadow-soft;
+
+    .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28rpx;
+
+        .title {
+            font-size: 34rpx;
+            font-weight: 700;
+            color: @text-primary;
+        }
+
+        .more {
+            font-size: 26rpx;
+            color: @primary-color;
+            font-weight: 500;
+        }
+    }
+
+    .diary-list {
+        .diary-item {
+            display: flex;
+            align-items: center;
+            padding: 20rpx 0;
+            border-bottom: 1rpx solid @border-light;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            &:active {
+                background: #FFF8F3;
+                margin: 0 -20rpx;
+                padding: 20rpx;
+                border-radius: @radius-md;
+                border-bottom: none;
+            }
+
+            .diary-cover {
+                width: 100rpx;
+                height: 100rpx;
+                background: linear-gradient(135deg, #FF9A56 0%, #FF7B3C 100%);
+                border-radius: @radius-md;
+                margin-right: 24rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4rpx 12rpx rgba(255, 154, 86, 0.2);
+
+                .play-icon {
+                    font-size: 36rpx;
+                    color: #fff;
+                }
+            }
+
+            .diary-info {
+                flex: 1;
+
+                .diary-title {
+                    display: block;
+                    font-size: 28rpx;
+                    color: @text-primary;
+                    margin-bottom: 8rpx;
+                    font-weight: 500;
+                }
+
+                .diary-date {
+                    font-size: 24rpx;
+                    color: @text-light;
+                }
+            }
+        }
+    }
+}
+
+
+
+// 安全提示悬浮按钮
+.safety-tip {
+    position: fixed;
+    right: 30rpx;
+    bottom: 140rpx;
+    width: 100rpx;
+    height: 100rpx;
+    background: linear-gradient(135deg, #FF6B6B, #EE0A24);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8rpx 28rpx rgba(238, 10, 36, 0.35);
+    animation: pulse 2s infinite;
+    z-index: 100;
+
+    .tip-icon {
+        font-size: 44rpx;
+    }
+
+    .tip-text {
+        font-size: 18rpx;
+        color: #fff;
+        margin-top: 2rpx;
+        font-weight: 500;
+    }
+}
+
+
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8rpx 28rpx rgba(238, 10, 36, 0.35);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 12rpx 36rpx rgba(238, 10, 36, 0.45);
+    }
+}
+
+
+
+// 空状态样式
+.empty-order {
+    background: @bg-card;
+    border-radius: @radius-lg;
+    padding: 60rpx 40rpx;
+    margin-bottom: 30rpx;
+    box-shadow: @shadow-soft;
+    text-align: center;
+
+    .empty-icon {
+        font-size: 120rpx;
+        margin-bottom: 30rpx;
+    }
+
+    .empty-text {
+        font-size: 28rpx;
+        color: @text-light;
+        margin-bottom: 30rpx;
+    }
+
+    .create-btn {
+        width: 280rpx;
+        height: 80rpx;
+        background: @primary-gradient;
+        color: #fff;
+        border-radius: 40rpx;
+        font-size: 28rpx;
+        font-weight: 600;
+        line-height: 80rpx;
+
+        &::after {
+            border: none;
+        }
+    }
+}

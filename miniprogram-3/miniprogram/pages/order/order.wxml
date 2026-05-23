@@ -1,0 +1,114 @@
+<view class="container">
+    <!-- Tab切换 -->
+    <view class="tabs">
+        <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+            <text class="tab-text">进行中</text>
+            <view class="tab-indicator" wx:if="{{currentTab === 0}}"></view>
+        </view>
+        <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+            <text class="tab-text">已完成</text>
+            <view class="tab-indicator" wx:if="{{currentTab === 1}}"></view>
+        </view>
+        <view class="tab-item {{currentTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">
+            <text class="tab-text">已取消</text>
+            <view class="tab-indicator" wx:if="{{currentTab === 2}}"></view>
+        </view>
+    </view>
+
+    <!-- 订单列表 -->
+    <scroll-view
+            scroll-y
+            class="order-scroll"
+            wx:if="{{orderList.length > 0}}"
+            refresher-enabled="{{true}}"
+            refresher-triggered="{{false}}"
+            bindrefresherrefresh="loadOrderList"
+    >
+        <view class="order-list">
+            <view class="order-item card" wx:for="{{orderList}}" wx:key="id">
+                <!-- 订单头部 -->
+                <view class="order-header">
+                    <view class="order-info-left">
+                        <text class="order-type-icon">{{item.type === 'pickup' ? '🏠' : '🏫'}}</text>
+                        <text class="order-type-text">{{item.type === 'pickup' ? '放学接' : '上学送'}}</text>
+                    </view>
+                    <view class="order-status-box {{item.statusClass}}">
+                        <text class="order-status-text">{{item.statusText}}</text>
+                    </view>
+                </view>
+
+                <!-- 订单信息 -->
+                <view class="order-content">
+                    <view class="info-row">
+                        <text class="info-icon">👶</text>
+                        <text class="info-text">{{item.childName}}</text>
+                        <text class="info-school" wx:if="{{item.child && item.child.school}}">· {{item.child.school}}</text>
+                    </view>
+                    <view class="info-row">
+                        <text class="info-icon">📅</text>
+                        <text class="info-text">{{item.scheduleTime}}</text>
+                    </view>
+                    <view class="info-row">
+                        <text class="info-icon">📍</text>
+                        <text class="info-text">从 {{item.startLocation && item.startLocation.address ? item.startLocation.address : '未设置'}}</text>
+                    </view>
+                    <view class="info-row">
+                        <text class="info-icon">🏁</text>
+                        <text class="info-text">到 {{item.endLocation && item.endLocation.address ? item.endLocation.address : '未设置'}}</text>
+                    </view>
+                </view>
+
+                <!-- 价格和操作 -->
+                <view class="order-footer">
+                    <view class="order-amount">
+                        <text class="amount-label">合计</text>
+                        <text class="amount-value">¥{{item.amount}}</text>
+                    </view>
+
+                    <view class="order-actions">
+                        <!-- 进行中状态的操作 -->
+                        <block wx:if="{{item.status >= 0 && item.status <= 6}}">
+                            <!-- 待派单/已派单：可以取消 -->
+                            <button wx:if="{{item.status === 0 || item.status === 1}}" class="btn-cancel" bindtap="cancelOrder" data-id="{{item.id}}">取消</button>
+                            <!-- 待派单：可以支付 -->
+                            <button wx:if="{{item.status === 0}}" class="btn-pay" bindtap="payOrder" data-id="{{item.id}}">去支付</button>
+                            <!-- 已派单：可以查看 -->
+                            <button wx:if="{{item.status === 1}}" class="btn-primary" bindtap="viewOrderDetail" data-id="{{item.id}}">查看</button>
+                            <!-- 服务中：可以追踪 -->
+                            <button wx:if="{{item.status >= 2 && item.status <= 6}}" class="btn-track" bindtap="trackOrder" data-id="{{item.id}}">🔍 实时追踪</button>
+                        </block>
+
+                        <!-- 已完成状态的操作 -->
+                        <block wx:if="{{item.status === 7}}">
+                            <button wx:if="{{!item.evaluated}}" class="btn-evaluate" bindtap="evaluateOrder" data-id="{{item.id}}">评价</button>
+                            <button class="btn-reorder" bindtap="reorder" data-id="{{item.id}}">再次预约</button>
+                        </block>
+
+                        <!-- 已取消状态的操作 -->
+                        <block wx:if="{{item.status === 8}}">
+                            <button class="btn-reorder" bindtap="reorder" data-id="{{item.id}}">再次预约</button>
+                            <button class="btn-outline-sm" bindtap="viewOrderDetail" data-id="{{item.id}}">查看详情</button>
+                        </block>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </scroll-view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+        <view class="empty-icon-wrapper">
+            <text class="empty-icon">{{currentTab === 0 ? '📋' : currentTab === 1 ? '✅' : '❌'}}</text>
+        </view>
+        <text class="empty-title">{{tabNames[currentTab]}}订单为空</text>
+        <text class="empty-desc">
+            {{currentTab === 0 ? '暂无进行中的订单' : currentTab === 1 ? '暂无已完成的订单' : '暂无已取消的订单'}}
+        </text>
+        <button class="btn-create" bindtap="goToCreateOrder" wx:if="{{currentTab === 0}}">
+            立即预约
+        </button>
+        <view class="empty-tips" wx:if="{{currentTab === 2}}">
+            <text class="tips-text">温馨提示：取消的订单可以在此查看</text>
+        </view>
+    </view>
+</view>

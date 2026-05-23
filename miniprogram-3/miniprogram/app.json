@@ -1,0 +1,51 @@
+{
+    "pages": [
+        "pages/login/login",
+        "pages/index/index",
+        "pages/order/order",
+        "pages/profile/profile",
+        "pages/order/create-order",
+        "pages/payment/payment",
+        "pages/safe-diary/safe-diary",
+        "pages/complaint/complaint",
+        "pages/children/children"
+    ],
+    "window": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "安心接送",
+        "navigationBarBackgroundColor": "#FFF8F3",
+        "backgroundColor": "#FFF8F3"
+    },
+    "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#FF9A56",
+        "backgroundColor": "#ffffff",
+        "borderStyle": "white",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "首页"
+            },
+            {
+                "pagePath": "pages/order/order",
+                "text": "订单"
+            },
+            {
+                "pagePath": "pages/profile/profile",
+                "text": "我的"
+            }
+        ]
+    },
+    "permission": {
+        "scope.userLocation": {
+            "desc": "您的位置信息将用于实时追踪接送车辆位置"
+        }
+    },
+    "requiredPrivateInfos": [
+        "getLocation",
+        "chooseLocation"
+    ],
+    "style": "v2",
+    "sitemapLocation": "sitemap.json",
+    "lazyCodeLoading": "requiredComponents"
+}

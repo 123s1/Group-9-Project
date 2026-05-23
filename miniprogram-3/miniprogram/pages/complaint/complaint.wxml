@@ -1,0 +1,172 @@
+<view class="container">
+    <!-- 标题区域 -->
+    <view class="header">
+        <view class="header-icon">📋</view>
+        <text class="header-title">投诉建议</text>
+        <text class="header-desc">您的反馈是我们改进的动力</text>
+    </view>
+
+    <!-- 投诉表单 -->
+    <view class="form-card">
+        <!-- 投诉类型 -->
+        <view class="form-item">
+            <view class="form-label">
+                <text class="label-text">投诉类型</text>
+                <text class="required">*</text>
+            </view>
+            <view class="type-grid">
+                <view
+                        class="type-item {{complaintType === item.value ? 'active' : ''}}"
+                        wx:for="{{complaintTypes}}"
+                        wx:key="value"
+                        bindtap="selectType"
+                        data-value="{{item.value}}">
+                    <text class="type-icon">{{item.icon}}</text>
+                    <text class="type-name">{{item.name}}</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 关联订单 -->
+        <view class="form-item">
+            <view class="form-label">
+                <text class="label-text">关联订单</text>
+            </view>
+            <view class="order-select {{relatedOrder ? 'has-order' : ''}}" bindtap="selectOrder">
+                <view class="order-info" wx:if="{{relatedOrder}}">
+                    <text class="order-no">{{relatedOrder.orderNo}}</text>
+                    <text class="order-desc">{{relatedOrder.typeText}} - {{relatedOrder.childName}}</text>
+                </view>
+                <view class="order-placeholder" wx:else>
+                    <text class="placeholder-text">请选择关联订单（可选）</text>
+                </view>
+                <text class="select-arrow">›</text>
+            </view>
+        </view>
+
+        <!-- 详细描述 -->
+        <view class="form-item">
+            <view class="form-label">
+                <text class="label-text">详细描述</text>
+                <text class="required">*</text>
+            </view>
+            <view class="textarea-wrapper">
+        <textarea
+                class="description-input"
+                placeholder="请详细描述您的问题或建议（至少10个字）"
+                placeholder-class="placeholder"
+                maxlength="500"
+                bindinput="onDescriptionInput"
+                value="{{description}}"></textarea>
+                <view class="word-count">
+                    <text class="{{description.length < 10 ? 'count-warning' : ''}}">{{description.length}}</text>
+                    /500
+                </view>
+            </view>
+        </view>
+
+        <!-- 证据照片 -->
+        <view class="form-item">
+            <view class="form-label">
+                <text class="label-text">证据照片</text>
+                <text class="optional">（可选，最多3张）</text>
+            </view>
+            <view class="upload-area">
+                <view class="upload-list">
+                    <view class="upload-item" wx:for="{{images}}" wx:key="index">
+                        <image class="upload-img" src="{{item}}" mode="aspectFill"></image>
+                        <view class="delete-btn" bindtap="deleteImage" data-index="{{index}}">×</view>
+                    </view>
+                    <view class="upload-btn" wx:if="{{images.length < 3}}" bindtap="chooseImage">
+                        <text class="upload-icon">+</text>
+                        <text class="upload-text">添加照片</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <!-- 联系方式 -->
+        <view class="form-item">
+            <view class="form-label">
+                <text class="label-text">联系电话</text>
+                <text class="required">*</text>
+            </view>
+            <input
+                    class="phone-input"
+                    type="number"
+                    placeholder="请输入手机号码"
+                    placeholder-class="placeholder"
+                    maxlength="11"
+                    bindinput="onPhoneInput"
+                    value="{{phone}}"/>
+        </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="submit-section">
+        <view class="submit-btn {{isSubmitting ? 'disabled' : ''}}" bindtap="submitComplaint">
+            <text wx:if="{{!isSubmitting}}">提交投诉</text>
+            <text wx:else>提交中...</text>
+        </view>
+        <view class="submit-tip">
+            <text class="tip-icon">⏰</text>
+            <text class="tip-text">客服将在24小时内尽快处理您的反馈</text>
+        </view>
+    </view>
+
+    <!-- 历史投诉 -->
+    <view class="history-section" wx:if="{{historyList.length > 0}}">
+        <view class="history-header">
+            <text class="history-title">我的投诉记录</text>
+            <text class="history-count">共{{historyList.length}}条</text>
+        </view>
+        <view class="history-list">
+            <view class="history-item" wx:for="{{historyList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+                <view class="history-top">
+                    <view class="history-type">
+                        <text class="type-tag">{{item.typeText}}</text>
+                        <text class="status-tag {{item.statusClass}}">{{item.statusText}}</text>
+                    </view>
+                    <text class="history-time">{{item.createTime}}</text>
+                </view>
+                <view class="history-content">
+                    <text class="history-desc">{{item.description}}</text>
+                </view>
+                <view class="history-bottom">
+                    <text class="ticket-no">工单号：{{item.ticketNo}}</text>
+                    <text class="view-detail">查看详情 ›</text>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 订单选择弹窗 -->
+    <view class="modal {{showOrderModal ? 'show' : ''}}" catchtap="closeOrderModal">
+        <view class="modal-content" catchtap="preventBubble">
+            <view class="modal-header">
+                <text class="modal-title">选择关联订单</text>
+                <text class="modal-close" bindtap="closeOrderModal">×</text>
+            </view>
+            <view class="modal-body">
+                <view class="order-list">
+                    <view class="order-item {{selectedOrderId === item.id ? 'selected' : ''}}"
+                          wx:for="{{orderOptions}}"
+                          wx:key="id"
+                          bindtap="confirmOrder"
+                          data-id="{{item.id}}">
+                        <view class="order-item-info">
+                            <text class="order-item-no">{{item.orderNo}}</text>
+                            <text class="order-item-desc">{{item.typeText}} - {{item.childName}}</text>
+                            <text class="order-item-date">{{item.date}}</text>
+                        </view>
+                        <view class="order-check" wx:if="{{selectedOrderId === item.id}}">✓</view>
+                    </view>
+                    <view class="order-none" wx:if="{{orderOptions.length === 0}}">
+                        <text>暂无订单可关联</text>
+                    </view>
+                </view>
+                <view class="no-order-btn" bindtap="clearOrder">不关联订单</view>
+            </view>
+        </view>
+    </view>
+</view>

@@ -1,0 +1,43 @@
+﻿# 操作系统文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE配置
+.idea/
+.vscode/
+.windsurf/
+*.iml
+*.sln
+.vs/
+
+# Gradle构建
+.gradle/
+build/
+bin/
+
+# Android
+app/build/
+*.apk
+*.aab
+local.properties
+
+# 小程序
+node_modules/
+pnpm-lock.yaml
+project.private.config.json
+
+# 日志和临时文件
+logs/
+*.log
+*.tmp
+*.swp
+
+# 压缩包
+*.zip
+*.rar
+*.7z
+
+# 敏感配置
+*.local.yaml
+*.local.properties

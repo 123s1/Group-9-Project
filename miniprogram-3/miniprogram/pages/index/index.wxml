@@ -1,0 +1,135 @@
+<view class="container">
+    <!-- 当前订单状态卡片 -->
+    <view class="order-card" wx:if="{{currentOrder}}">
+        <view class="order-header">
+            <view class="order-info">
+                <text class="order-label">当前订单</text>
+                <text class="order-status {{orderStatusClass}}">{{orderStatusText}}</text>
+            </view>
+            <text class="order-time">{{currentOrder.scheduleTime}}</text>
+        </view>
+
+        <view class="order-detail">
+            <view class="detail-row">
+                <text class="label">接送类型：</text>
+                <text class="value">{{currentOrder.type === 'pickup' ? '放学接' : '上学送'}}</text>
+            </view>
+            <view class="detail-row">
+                <text class="label">孩子：</text>
+                <text class="value">{{currentOrder.childName}}</text>
+            </view>
+            <view class="detail-row">
+                <text class="label">接送员：</text>
+                <text class="value">{{currentOrder.escortName || '匹配中...'}}</text>
+            </view>
+        </view>
+
+        <view class="order-actions">
+            <button class="btn-outline" bindtap="viewOrderDetail">查看详情</button>
+            <button class="btn-primary" bindtap="trackOrder" wx:if="{{currentOrder.status >= 2 && currentOrder.status <= 6}}">实时追踪</button>
+        </view>
+    </view>
+
+    <!-- 快捷入口 -->
+    <view class="quick-card">
+        <view class="section-title">
+            <text class="title">快捷服务</text>
+        </view>
+        <view class="action-grid">
+            <view class="action-item" bindtap="goToOrder" data-type="normal">
+                <view class="action-icon">📅</view>
+                <text class="action-text">立即预约</text>
+            </view>
+            <view class="action-item" bindtap="goToOrder" data-type="emergency">
+                <view class="action-icon">🚨</view>
+                <text class="action-text">紧急加单</text>
+            </view>
+            <view class="action-item" bindtap="goToOrderList">
+                <view class="action-icon">📋</view>
+                <text class="action-text">订单历史</text>
+            </view>
+            <view class="action-item" bindtap="goToChildren">
+                <view class="action-icon">👶</view>
+                <text class="action-text">孩子管理</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 会员信息卡片 -->
+    <view class="member-card" bindtap="goToMemberCenter">
+        <view class="member-header">
+            <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+            <view class="member-info">
+                <text class="nickname">{{userInfo.nickName || '家长用户'}}</text>
+                <view class="level-tag {{memberLevel}}">{{memberLevelName}}</view>
+            </view>
+            <text class="arrow">›</text>
+        </view>
+        <view class="member-progress">
+            <view class="progress-info">
+                <text class="progress-label">累计消费 {{totalConsumption}} 元</text>
+                <text class="progress-target">距{{nextLevelName}}差{{nextLevelAmount}}元</text>
+            </view>
+            <view class="progress-bar">
+                <view class="progress-fill" style="width: {{memberProgress}}%;"></view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 增值服务推荐 -->
+    <view class="service-card">
+        <view class="section-title">
+            <text class="title">热门推荐</text>
+            <text class="more" bindtap="viewMoreServices">查看更多 ›</text>
+        </view>
+        <scroll-view scroll-x class="service-scroll" enhanced="{{true}}" show-scrollbar="{{false}}">
+            <view class="service-item" wx:for="{{recommendServices}}" wx:key="id" bindtap="goToService" data-id="{{item.id}}">
+                <view class="service-icon">{{item.icon}}</view>
+                <text class="service-name">{{item.name}}</text>
+                <text class="service-price">{{item.price}}</text>
+            </view>
+        </scroll-view>
+    </view>
+
+    <!-- 安心日记 -->
+    <view class="diary-card" wx:if="{{diaryList.length > 0}}">
+        <view class="section-title">
+            <text class="title">安心日记</text>
+            <text class="more" bindtap="viewMoreDiary">查看更多 ›</text>
+        </view>
+        <view class="diary-list">
+            <view class="diary-item" wx:for="{{diaryList}}" wx:key="id" bindtap="playDiary">
+                <view class="diary-cover">
+                    <text class="play-icon">▶</text>
+                </view>
+                <view class="diary-info">
+                    <text class="diary-title">{{item.title}}</text>
+                    <text class="diary-date">{{item.createTime}}</text>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 快捷服务入口 -->
+    <view class="quick-card" wx:if="{{!diaryList.length > 0}}">
+        <view class="section-title">
+            <text class="title">其他服务</text>
+        </view>
+        <view class="action-grid">
+            <view class="action-item" bindtap="goToPayment">
+                <view class="action-icon">💰</view>
+                <text class="action-text">去支付</text>
+            </view>
+            <view class="action-item" bindtap="goToDiary">
+                <view class="action-icon">📹</view>
+                <text class="action-text">安心日记</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 安全提示 -->
+    <view class="safety-tip" bindtap="onEmergencyCall">
+        <text class="tip-icon">🆘</text>
+        <text class="tip-text">紧急求助</text>
+    </view>
+</view>
