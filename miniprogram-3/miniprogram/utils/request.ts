@@ -1,7 +1,8 @@
-// 请求封装
 import {showLoading, hideLoading} from './util';
 
-const BASE_URL = 'http://localhost:8900'; // 替换为实际的后端API地址
+// 通过构建变量或配置文件注入，开发环境默认本地地址
+// 部署时替换为实际后端地址，例如 https://api.viakid.com/api/v1
+const BASE_URL = 'http://localhost:8900/api/v1';
 
 interface RequestOptions {
     url: string;
@@ -10,12 +11,6 @@ interface RequestOptions {
     header?: any;
     showLoading?: boolean;
 }
-
-
-
-
-
-
 
 const request = (options: RequestOptions): Promise<any> => {
     return new Promise((resolve, reject) => {
@@ -36,10 +31,9 @@ const request = (options: RequestOptions): Promise<any> => {
             },
             success(res: any) {
                 hideLoading();
-                if (res.data.code === 200) {
+                if (res.data.code === 0) {
                     resolve(res.data);
-                } else if (res.data.code === 401) {
-                    // token过期，跳转登录
+                } else if (res.data.code === 401 || res.statusCode === 401) {
                     wx.removeStorageSync('token');
                     wx.removeStorageSync('userInfo');
                     wx.showToast({

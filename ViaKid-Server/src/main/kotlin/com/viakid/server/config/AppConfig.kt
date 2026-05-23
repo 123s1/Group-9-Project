@@ -4,13 +4,19 @@ import io.ktor.server.config.*
 
 data class AppConfig(
     val database: DatabaseConfig,
-    val jwt: JwtConfig
+    val jwt: JwtConfig,
+    val corsAllowedHosts: List<String>
 ) {
     companion object {
         fun from(config: ApplicationConfig): AppConfig {
             return AppConfig(
                 database = DatabaseConfig.from(config.config("database")),
-                jwt = JwtConfig.from(config.config("jwt"))
+                jwt = JwtConfig.from(config.config("jwt")),
+                corsAllowedHosts = System.getenv("CORS_ALLOWED_HOSTS")
+                    ?.split(",")
+                    ?.map { it.trim() }
+                    ?.filter { it.isNotEmpty() }
+                    ?: emptyList()
             )
         }
     }
@@ -27,9 +33,12 @@ data class DatabaseConfig(
         fun from(config: ApplicationConfig): DatabaseConfig {
             return DatabaseConfig(
                 driver = config.property("driver").getString(),
-                url = config.property("url").getString(),
-                user = config.property("user").getString(),
-                password = config.property("password").getString(),
+                url = System.getenv("DB_URL")
+                    ?: config.property("url").getString(),
+                user = System.getenv("DB_USER")
+                    ?: config.property("user").getString(),
+                password = System.getenv("DB_PASSWORD")
+                    ?: config.property("password").getString(),
                 poolSize = config.propertyOrNull("poolSize")?.getString()?.toInt() ?: 10
             )
         }
@@ -47,7 +56,8 @@ data class JwtConfig(
     companion object {
         fun from(config: ApplicationConfig): JwtConfig {
             return JwtConfig(
-                secret = config.property("secret").getString(),
+                secret = System.getenv("JWT_SECRET")
+                    ?: config.property("secret").getString(),
                 issuer = config.property("issuer").getString(),
                 audience = config.property("audience").getString(),
                 realm = config.property("realm").getString(),

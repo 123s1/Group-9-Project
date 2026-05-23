@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -111,12 +112,8 @@ class TokenManager @Inject constructor(
      * @return String? 当前的访问令牌，如果未登录则返回null
      */
     suspend fun getAccessTokenSync(): String? {
-        var token: String? = null
-        dataStore.data.collect {
-            /** @param preferences DataStore中的Preferences对象 */
-                preferences ->
-            token = preferences[ACCESS_TOKEN_KEY]
-        }
-        return token
+        return dataStore.data.map { preferences ->
+            preferences[ACCESS_TOKEN_KEY]
+        }.first()
     }
 }

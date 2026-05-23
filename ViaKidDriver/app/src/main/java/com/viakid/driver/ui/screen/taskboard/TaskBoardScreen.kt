@@ -75,9 +75,7 @@ fun TaskBoardScreen(
                 }
             )
         }
-    ) {
-        /** @param paddingValues 填充的 Padding */
-            paddingValues ->
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -169,9 +167,7 @@ fun TaskBoardScreen(
                         )
                     }
 
-                    items(orders) {
-                        /** @param order  */
-                            order ->
+                    items(orders) { order ->
                         TaskOrderCard(
                             order = order,
                             onClick = { onNavigateToOrderDetail(order.id) }
@@ -391,9 +387,7 @@ private fun StatusFilter(
                     label = { Text("全部 (${orders.size})") }
                 )
 
-                OrderStatus.entries.take(4).forEach {
-                    /** @param status 状态 */
-                        status ->
+                OrderStatus.entries.take(4).forEach { status ->
                     val count = statusCounts[status] ?: 0
                     if (count > 0) {
                         FilterChip(
@@ -452,9 +446,7 @@ private fun TaskOrderCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // 孩子信息
-            order.children.forEach {
-                /** @param child 孩子对象*/
-                    child ->
+            order.children.forEach { child ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Person,

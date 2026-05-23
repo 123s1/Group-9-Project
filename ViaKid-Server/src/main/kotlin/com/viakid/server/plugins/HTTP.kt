@@ -1,5 +1,6 @@
 package com.viakid.server.plugins
 
+import com.viakid.server.config.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.calllogging.*
@@ -13,6 +14,9 @@ fun Application.configureHTTP() {
         filter { call -> call.request.local.uri.startsWith("/") }
     }
     install(Compression)
+
+    val allowedHosts = AppConfig.from(environment.config).corsAllowedHosts
+
     install(CORS) {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
@@ -20,6 +24,11 @@ fun Application.configureHTTP() {
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
-        anyHost() // TODO: 生产环境限制为具体域名
+
+        if (allowedHosts.isEmpty()) {
+            anyHost()
+        } else {
+            allowedHosts.forEach { host -> allowHost(host, schemes = listOf("https", "http")) }
+        }
     }
 }

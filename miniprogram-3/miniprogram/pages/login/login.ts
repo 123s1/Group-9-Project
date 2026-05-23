@@ -245,51 +245,52 @@ Page({
 
         this.setData({loading: true});
 
-        // 模拟登录请求
-        setTimeout(() => {
-            this.setData({loading: false});
+        const loginUrl = loginType === 'sms' ? '/auth/login/sms' : '/auth/login';
+        const loginData = loginType === 'sms'
+            ? {phone: phoneNumber, code: verifyCode, deviceId: 'miniprogram'}
+            : {phone: phoneNumber, password: password, deviceId: 'miniprogram'};
 
-            // 验证码：123456，密码：123456
-            const isValidCode = verifyCode === '123456';
-            const isValidPwd = password === '123456';
+        wx.request({
+            url: 'http://localhost:8900/api/v1' + loginUrl,
+            method: 'POST',
+            data: loginData,
+            header: {'Content-Type': 'application/json'},
+            success: (res: any) => {
+                this.setData({loading: false});
+                if (res.data.code === 0 && res.data.data) {
+                    wx.setStorageSync('token', res.data.data.accessToken);
+                    wx.setStorageSync('refreshToken', res.data.data.refreshToken);
+                    wx.setStorageSync('userInfo', {
+                        phone: phoneNumber,
+                        nickname: res.data.data.driver?.name || '家长用户',
+                        avatar: res.data.data.driver?.avatar || '',
+                        totalConsumption: 0
+                    });
 
-            if ((loginType === 'sms' && isValidCode) || (loginType === 'password' && isValidPwd)) {
-                // 保存登录信息
-                wx.setStorageSync('token', 'mock_token_' + Date.now());
-                wx.setStorageSync('userInfo', {
-                    phone: phoneNumber,
-                    nickname: '家长用户',
-                    avatar: '',
-                    totalConsumption: 0
-                });
-
-                wx.showToast({
-                    title: '登录成功',
-                    icon: 'success',
-                    success: () => {
-                        setTimeout(() => {
-                            wx.switchTab({
-                                url: '/pages/index/index'
-                            });
-                        }, 1000);
-                    }
-                });
-            } else {
-                if (loginType === 'sms') {
-                    this.setData({errors: {code: '验证码错误'}});
                     wx.showToast({
-                        title: '验证码错误',
-                        icon: 'none'
+                        title: '登录成功',
+                        icon: 'success',
+                        success: () => {
+                            setTimeout(() => {
+                                wx.switchTab({url: '/pages/index/index'});
+                            }, 1000);
+                        }
                     });
                 } else {
-                    this.setData({errors: {password: '密码错误'}});
-                    wx.showToast({
-                        title: '密码错误',
-                        icon: 'none'
-                    });
+                    const errMsg = res.data.message || '登录失败';
+                    if (loginType === 'sms') {
+                        this.setData({errors: {code: errMsg}});
+                    } else {
+                        this.setData({errors: {password: errMsg}});
+                    }
+                    wx.showToast({title: errMsg, icon: 'none'});
                 }
+            },
+            fail: () => {
+                this.setData({loading: false});
+                wx.showToast({title: '网络异常，请稍后重试', icon: 'none'});
             }
-        }, 1500);
+        });
     },
 
     // 微信登录
@@ -299,29 +300,40 @@ Page({
         wx.login({
             success: (res) => {
                 if (res.code) {
-                    // 调用后端接口
-                    setTimeout(() => {
-                        hideLoading();
+                    wx.request({
+                        url: 'http://localhost:8900/api/v1/auth/wx-login',
+                        method: 'POST',
+                        data: {code: res.code, deviceId: 'miniprogram'},
+                        header: {'Content-Type': 'application/json'},
+                        success: (loginRes: any) => {
+                            hideLoading();
+                            if (loginRes.data.code === 0 && loginRes.data.data) {
+                                wx.setStorageSync('token', loginRes.data.data.accessToken);
+                                wx.setStorageSync('refreshToken', loginRes.data.data.refreshToken);
+                                wx.setStorageSync('userInfo', {
+                                    nickname: loginRes.data.data.driver?.name || '微信用户',
+                                    avatar: loginRes.data.data.driver?.avatar || '',
+                                    totalConsumption: 0
+                                });
 
-                        wx.setStorageSync('token', 'mock_token_' + Date.now());
-                        wx.setStorageSync('userInfo', {
-                            nickname: '微信用户',
-                            avatar: '',
-                            totalConsumption: 0
-                        });
-
-                        wx.showToast({
-                            title: '登录成功',
-                            icon: 'success',
-                            success: () => {
-                                setTimeout(() => {
-                                    wx.switchTab({
-                                        url: '/pages/index/index'
-                                    });
-                                }, 1000);
+                                wx.showToast({
+                                    title: '登录成功',
+                                    icon: 'success',
+                                    success: () => {
+                                        setTimeout(() => {
+                                            wx.switchTab({url: '/pages/index/index'});
+                                        }, 1000);
+                                    }
+                                });
+                            } else {
+                                wx.showToast({title: loginRes.data.message || '登录失败', icon: 'none'});
                             }
-                        });
-                    }, 1000);
+                        },
+                        fail: () => {
+                            hideLoading();
+                            wx.showToast({title: '网络异常', icon: 'none'});
+                        }
+                    });
                 }
             },
             fail: () => {

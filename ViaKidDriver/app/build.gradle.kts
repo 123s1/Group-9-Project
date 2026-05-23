@@ -33,20 +33,32 @@ android {
         val minor = versionParts[1].toInt()
         val patch = versionParts[2].toInt()
 
-        // 计算公式: major * 10000 + minor * 100 + patch
-        versionCode = major * 10000 + minor * 100 + patch  // 0*10000 + 3*100 + 1 = 301
+        // 计算公式: major * 1000000 + minor * 10000 + patch * 100 + build
+        // 兼容历史 versionCode 30000，保持单调递增
+        versionCode = major * 1000000 + minor * 10000 + patch * 100  // 0*1000000 + 3*10000 + 1*100 = 30100
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // 签名配置
+    // 签名配置：从 gradle.properties、local.properties 或环境变量读取，不在源码中存储凭据
     signingConfigs {
         create("release") {
-            storeFile = file("D:\\Android_Projects\\time_announcer\\pwdunjx.nn.br.jks")
-            storePassword = "unjx.nn.br"
-            keyAlias = "unjx"
-            keyPassword = "unjx.nn.br"
+            val storePath = project.findProperty("RELEASE_STORE_FILE")?.toString()
+                ?: System.getenv("RELEASE_STORE_FILE")
+            val storePwd = project.findProperty("RELEASE_STORE_PASSWORD")?.toString()
+                ?: System.getenv("RELEASE_STORE_PASSWORD")
+            val alias = project.findProperty("RELEASE_KEY_ALIAS")?.toString()
+                ?: System.getenv("RELEASE_KEY_ALIAS")
+            val keyPwd = project.findProperty("RELEASE_KEY_PASSWORD")?.toString()
+                ?: System.getenv("RELEASE_KEY_PASSWORD")
+
+            if (storePath != null && storePwd != null && alias != null && keyPwd != null) {
+                storeFile = file(storePath)
+                storePassword = storePwd
+                keyAlias = alias
+                keyPassword = keyPwd
+            }
         }
         getByName("debug") {
             // debug 签名保持默认配置
@@ -54,7 +66,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8900/api/v1/\"")
+        }
         release {
+            buildConfigField("String", "BASE_URL", "\"https://api.viakid.com/api/v1/\"")
             // Release 模式：开启所有优化
             isMinifyEnabled = true
             isShrinkResources = true

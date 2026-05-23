@@ -45,11 +45,12 @@ fun Route.orderRoutes() {
                 call.respond(ApiResponse(code = 0, message = "success", data = data))
             }
 
-            // 获取订单详情
+            // 获取订单详情（含司机归属校验）
             get("/{orderId}") {
+                val driverId = extractUserId(call)
                 val orderId = call.parameters["orderId"]?.let { UUID.fromString(it) }
                     ?: throw IllegalArgumentException("无效的订单ID")
-                val data = orderService.getOrderDetail(orderId)
+                val data = orderService.getOrderDetail(orderId, driverId)
                 call.respond(ApiResponse(code = 0, message = "success", data = data))
             }
 
